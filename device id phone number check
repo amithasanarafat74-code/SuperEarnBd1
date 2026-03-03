@@ -1,0 +1,143 @@
+const express = require('express');
+const path = require('path');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public'));
+
+// MongoDB Connection
+mongoose.connect(process.env.MONGODB_URI)
+    .then(() => console.log('MongoDB Connected Successfully!'))
+    .catch(err => console.log('MongoDB Connection Error:', err));
+
+// User Schema
+const userSchema = new mongoose.Schema({
+    username: { type: String, unique: true },
+    email: { type: String, unique: true },
+    phone: { type: String, unique: true }, // ফোন নম্বর ইউনিক
+    password: String,
+    referralCode: String,
+    referredBy: String,
+    deviceId: { type: String, unique: true }, // ডিভাইস আইডি ইউনিক
+    active: { type: Boolean, default: false },
+    banned: { type: Boolean, default: false },
+    balances: {
+        refer: { type: Number, default: 0 },
+        gmail: { type: Number, default: 0 },
+        job: { type: Number, default: 0 }
+    },
+    referrals: [String],
+    referralCount: { type: Number, default: 0 },
+    completedJobs: [Number], // Free Job ID list
+    typingJobs: [Object], // Typing job history
+    gmailRequests: [Object], // Gmail sell requests
+    createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.model('User', userSchema);
+
+// --- API Routes ---
+
+// Registration
+app.post('/api/register', async (req, res) => {
+    try {
+        const { username, email, password, phone, referralCode, deviceId } = req.body;
+
+        // Duplicate Check
+        const existingUser = await User.findOne({ 
+            $or: [{ email }, { username }, { phone }, { deviceId }] 
+        });
+        
+        if (existingUser) {
+            if(existingUser.email === email) return res.status(400).json({ error: 'Email already exists' });
+            if(existingUser.username === username) return res.status(400).json({ error: 'Username already taken' });
+            if(existingUser.phone === phone) return res.status(400).json({ error: 'Phone number already used' });
+            if(existingUser.deviceId === deviceId) return res.status(400).json({ error: 'This device already has an account!' });
+        }
+
+        const newUser = new User({
+            username, email, password, phone, deviceId,
+            referralCode: 'REF' + Math.random().toString(36).substr(2, 8).toUpperCase()
+        });
+
+        // Referral Logic
+        if (referralCode) {
+            const referrer = await User.findOne({ referralCode });
+            if (referrer) {
+                newUser.referredBy = referrer._id;
+                referrer.referrals.push(newUser._id);
+                referrer.referralCount++;
+                await referrer.save();
+            }
+        }
+
+        await newUser.save();
+        res.json({ success: true, user: newUser });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Login
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await User.findOne({ 
+            $or: [{ email: email }, { username: email }], 
+            password: password 
+        });
+
+        if (!user) return res.status(401).json({ error: 'Invalid credentials' });
+        if (user.banned) return res.status(403).json({ error: 'Account banned' });
+
+        res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Update User Data (Balance, Jobs etc)
+app.post('/api/user/update', async (req, res) => {
+    try {
+        const { userId, data } = req.body;
+        const user = await User.findByIdAndUpdate(userId, { $set: data }, { new: true });
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Push new data (Gmail Request, Withdraw etc)
+app.post('/api/user/push', async (req, res) => {
+    try {
+        const { userId, field, data } = req.body; // field: 'gmailRequests' or 'withdrawRequests'
+        const user = await User.findByIdAndUpdate(userId, { $push: { [field]: data } }, { new: true });
+        res.json({ success: true, user });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get All Users (Admin)
+app.get('/api/admin/users', async (req, res) => {
+    try {
+        const users = await User.find({}).sort({ createdAt: -1 });
+        res.json(users);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Frontend Route
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
