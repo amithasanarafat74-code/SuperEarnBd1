@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SuperEarn BD - Premium Bot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --accent-gold: #d4a853;
+            --accent-gold-light: #f0c674;
+            --accent-emerald: #10b981;
+            --accent-rose: #f43f5e;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --border-color: #2a2a35;
+            --glass-bg: rgba(26, 26, 37, 0.85);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Background Effects */
+        .animated-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background: radial-gradient(ellipse at 30% 20%, rgba(212, 168, 83, 0.08) 0%, transparent 50%),
+                        radial-gradient(ellipse at 70% 80%, rgba(16, 185, 129, 0.06) 0%, transparent 50%);
+        }
+
+        .grid-pattern {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background-image: linear-gradient(rgba(212, 168, 83, 0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(212, 168, 83, 0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        .glass-card:hover { border-color: rgba(212, 168, 83, 0.3); }
+
+        /* Buttons */
+        .btn-premium {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, #c49b40 100%);
+            color: var(--bg-primary); font-weight: 600; padding: 12px 24px;
+            border-radius: 12px; border: none; cursor: pointer; transition: all 0.3s ease;
+        }
+        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212, 168, 83, 0.4); }
+
+        .btn-secondary {
+            background: transparent; border: 1px solid var(--border-color); color: var(--text-primary);
+            padding: 10px 20px; border-radius: 10px; cursor: pointer; transition: all 0.3s ease;
+        }
+        .btn-secondary:hover { border-color: var(--accent-gold); background: rgba(212, 168, 83, 0.1); }
+
+        /* Inputs */
+        .input-field {
+            width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border-color);
+            border-radius: 10px; padding: 14px 16px; color: var(--text-primary); font-size: 15px;
+            transition: all 0.3s ease; outline: none;
+        }
+        .input-field:focus { border-color: var(--accent-gold); box-shadow: 0 0 0 3px rgba(212, 168, 83, 0.15); }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed; top: 0; right: -320px; width: 300px; height: 100%;
+            background: var(--bg-secondary); border-left: 1px solid var(--border-color);
+            z-index: 1000; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto;
+        }
+        .sidebar.active { right: 0; }
+        
+        .sidebar-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        .menu-item {
+            display: flex; align-items: center; gap: 14px; padding: 14px 20px;
+            border-bottom: 1px solid var(--border-color); cursor: pointer; transition: all 0.3s ease;
+        }
+        .menu-item:hover { background: rgba(212, 168, 83, 0.1); padding-left: 28px; }
+        .menu-item svg { width: 20px; height: 20px; color: var(--accent-gold); flex-shrink: 0; }
+
+        /* Page & Tab System */
+        .page { display: none; animation: fadeIn 0.4s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .tab-container { display: flex; gap: 6px; background: var(--bg-tertiary); padding: 5px; border-radius: 10px; margin-bottom: 16px; }
+        .tab-btn { flex: 1; padding: 8px 12px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); cursor: pointer; transition: all 0.3s ease; font-size: 13px; }
+        .tab-btn.active { background: var(--accent-gold); color: var(--bg-primary); }
+
+        /* Badges */
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge-pending { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .badge-approved { background: rgba(16, 185, 129, 0.2); color: var(--accent-emerald); }
+        .badge-rejected { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); }
+        
+        /* Toast */
+        .toast {
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(100px);
+            background: var(--bg-secondary); border: 1px solid var(--border-color); padding: 12px 20px;
+            border-radius: 10px; z-index: 2000; opacity: 0; transition: all 0.4s ease; display: flex; align-items: center; gap: 10px;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+        /* Others */
+        .logo-text {
+            background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-light) 50%, var(--accent-gold) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .referral-link { background: var(--bg-tertiary); border: 1px dashed var(--accent-gold); border-radius: 10px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent-gold); word-break: break-all; }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: var(--bg-primary); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <div class="grid-pattern"></div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"><span id="toast-icon"></span><span id="toast-message"></span></div>
+
+    <!-- Sidebar Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar" id="sidebar">
+        <div class="p-5 border-b border-[#2a2a35] flex items-center justify-between">
+            <h3 class="text-lg font-semibold">Menu</h3>
+            <button onclick="toggleSidebar()" class="p-2 hover:bg-[#2a2a35] rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <nav id="menuNav"></nav>
+    </div>
+
+    <!-- Main Container -->
+    <div class="max-w-md mx-auto px-4 py-6 min-h-screen">
+
+        <!-- LOGIN PAGE -->
+        <div id="loginPage" class="page active">
+            <div class="text-center mb-8 pt-6">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#d4a853] to-[#c49b40] flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <h1 class="text-3xl font-bold logo-text">SuperEarn BD</h1>
+                <p class="text-[#a1a1aa] mt-2">Earn Money Online Platform</p>
+            </div>
+            <div class="glass-card p-6">
+                <h2 class="text-xl font-semibold mb-6">Login</h2>
+                <form id="loginForm" class="space-y-4">
+                    <input type="text" id="loginEmail" class="input-field" placeholder="Email or Username" required>
+                    <input type="password" id="loginPassword" class="input-field" placeholder="Password" required>
+                    <button type="submit" class="btn-premium w-full">Login</button>
+                </form>
+                <div class="mt-4 text-center text-sm">
+                    <span class="text-[#a1a1aa]">No account?</span>
+                    <button onclick="showPage('registerPage')" class="text-[#d4a853] font-semibold ml-1">Register</button>
+                </div>
+                <div class="mt-4">
+                    <button onclick="telegramLogin()" class="btn-secondary w-full flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#d4a853"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .37z"/></svg>
+                        Login with Telegram
+                    </button>
+                </div>
+                <div class="mt-4 text-center">
+                    <button onclick="showPage('adminLoginPage')" class="text-xs text-[#71717a] hover:text-[#f43f5e]">Admin Panel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- REGISTER PAGE -->
+        <div id="registerPage" class="page">
+            <div class="text-center mb-6 pt-6">
+                <h1 class="text-2xl font-bold logo-text">Create Account</h1>
+            </div>
+            <div class="glass-card p-6">
+                <form id="registerForm" class="space-y-4">
+                    <input type="text" id="regUsername" class="input-field" placeholder="Username" required>
+                    <input type="email" id="regEmail" class="input-field" placeholder="Email" required>
+                    <input type="password" id="regPassword" class="input-field" placeholder="Password" required>
+                    <input type="password" id="regConfirmPassword" class="input-field" placeholder="Confirm Password" required>
+                    <input type="text" id="regReferral" class="input-field" placeholder="Referral Code (Optional)">
+                    <button type="submit" class="btn-premium w-full">Register</button>
+                </form>
+                <div class="mt-4 text-center text-sm">
+                    <span class="text-[#a1a1aa]">Have account?</span>
+                    <button onclick="showPage('loginPage')" class="text-[#d4a853] font-semibold ml-1">Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN LOGIN PAGE -->
+        <div id="adminLoginPage" class="page">
+            <div class="text-center mb-6 pt-6">
+                <h1 class="text-2xl font-bold text-[#f43f5e]">Admin Panel</h1>
+            </div>
+            <div class="glass-card p-6">
+                <form id="adminLoginForm" class="space-y-4">
+                    <input type="text" id="adminUsername" class="input-field" placeholder="Admin Username" required>
+                    <input type="password" id="adminPassword" class="input-field" placeholder="Admin Password" required>
+                    <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#f43f5e] to-[#dc2626] text-white font-semibold">Login</button>
+                </form>
+                <div class="mt-4 text-center">
+                    <button onclick="showPage('loginPage')" class="text-xs text-[#71717a]">Back to User Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HOME PAGE -->
+        <div id="homePage" class="page">
+            <header class="flex items-center justify-between mb-6">
+                <div>
+                    <p class="text-[#a1a1aa] text-sm">Welcome,</p>
+                    <h2 class="text-xl font-bold" id="userDisplayName">User</h2>
+                </div>
+                <button onclick="toggleSidebar()" class="p-3 rounded-xl bg-[#1a1a25] border border-[#2a2a35]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                </button>
+            </header>
+
+            <!-- Activation Banner -->
+            <div id="accountStatusBanner" class="mb-6"></div>
+
+            <!-- Notice -->
+            <div id="noticeBoard" class="glass-card p-4 mb-6 text-sm text-[#a1a1aa]"></div>
+
+            <!-- Balances -->
+            <div class="glass-card p-5 mb-6">
+                <p class="text-sm text-[#a1a1aa] mb-1">Total Balance</p>
+                <p class="text-3xl font-bold text-[#d4a853] font-mono mb-4" id="totalBalance">0.00 TK</p>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-[#12121a] p-3 rounded-xl text-center">
+                        <p class="text-xs text-[#71717a]">Refer</p>
+                        <p class="font-semibold text-[#10b981] font-mono text-sm" id="referBalance">0.00</p>
+                    </div>
+                    <div class="bg-[#12121a] p-3 rounded-xl text-center">
+                        <p class="text-xs text-[#71717a]">Gmail</p>
+                        <p class="font-semibold text-[#06b6d4] font-mono text-sm" id="gmailBalance">0.00</p>
+                    </div>
+                    <div class="bg-[#12121a] p-3 rounded-xl text-center">
+                        <p class="text-xs text-[#71717a]">Job</p>
+                        <p class="font-semibold text-[#fbbf24] font-mono text-sm" id="jobBalance">0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div class="glass-card p-4 text-center">
+                    <p class="text-xl font-bold text-[#d4a853]" id="totalReferrals">0</p>
+                    <p class="text-xs text-[#a1a1aa]">Referrals</p>
+                </div>
+                <div class="glass-card p-4 text-center">
+                    <p class="text-xl font-bold text-[#10b981]" id="activeReferrals">0</p>
+                    <p class="text-xs text-[#a1a1aa]">Active Referrals</p>
+                </div>
+            </div>
+
+            <!-- Referral Section -->
+            <div class="glass-card p-5">
+                <h3 class="font-semibold mb-3 text-sm">Your Referral Link</h3>
+                <div class="referral-link mb-3" id="userReferralLink">Loading...</div>
+                <div class="flex gap-2">
+                    <button onclick="copyReferralLink()" class="btn-secondary flex-1 text-sm py-2">Copy Link</button>
+                    <button onclick="shareReferralLink()" class="btn-premium flex-1 text-sm py-2">Share</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GMAIL SELL PAGE -->
+        <div id="gmailSellPage" class="page">
+            <header class="flex items-center gap-4 mb-6">
+                <button onclick="showPage('homePage')" class="p-2 rounded-xl bg-[#1a1a25] border border-[#2a2a35]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="text-xl font-bold">Gmail Sell</h2>
+            </header>
+            <div id="gmailSellContent"></div>
+        </div>
+
+        <!-- FREE JOB PAGE -->
+        <div id="freeJobPage" class="page">
+            <header class="flex items-center gap-4 mb-6">
+                <button onclick="showPage('homePage')" class="p-2 rounded-xl bg-[#1a1a25] border border-[#2a2a35]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="text-xl font-bold">Free Job</h2>
+            </header>
+            <div id="freeJobContent"></div>
+        </div>
+
+        <!-- TYPING JOB PAGE -->
+        <div id="typingJobPage" class="page">
+            <header class="flex items-center gap-4 mb-6">
+                <button onclick="showPage('homePage')" class="p-2 rounded-xl bg-[#1a1a25] border border-[#2a2a35]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="text-xl font-bold">Typing Job</h2>
+            </header>
+            <div id="typingJobContent"></div>
+        </div>
+
+        <!-- WITHDRAW PAGE -->
+        <div id="withdrawPage" class="page">
+            <header class="flex items-center gap-4 mb-6">
+                <button onclick="showPage('homePage')" class="p-2 rounded-xl bg-[#1a1a25] border border-[#2a2a35]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="text-xl font-bold">Withdraw</h2>
+            </header>
+            
+            <div class="tab-container">
+                <button class="tab-btn active" onclick="switchWithdrawWallet('refer')">Refer</button>
+                <button class="tab-btn" onclick="switchWithdrawWallet('gmail')">Gmail</button>
+                <button class="tab-btn" onclick="switchWithdrawWallet('job')">Job</button>
+            </div>
+
+            <div class="glass-card p-5 mb-4">
+                <div class="text-center mb-4">
+                    <p class="text-sm text-[#a1a1aa]">Available</p>
+                    <p class="text-2xl font-bold text-[#d4a853] font-mono" id="withdrawAvailable">0.00 TK</p>
+                    <p class="text-xs text-[#71717a] mt-1">Min: <span id="withdrawMin">50</span> TK</p>
+                </div>
+                <form id="withdrawForm" class="space-y-3">
+                    <input type="number" id="withdrawAmount" class="input-field" placeholder="Amount" required>
+                    <select id="withdrawMethod" class="input-field" required>
+                        <option value="">Select Method</option>
+                        <option value="bKash">bKash</option>
+                        <option value="Nagad">Nagad</option>
+                        <option value="Rocket">Rocket</option>
+                    </select>
+                    <input type="text" id="withdrawAccount" class="input-field" placeholder="Account Number" required>
+                    <button type="submit" class="btn-premium w-full">Submit</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- GIFT CODE PAGE -->
+        <div id="giftCodePage" class="page">
+            <header class="flex items-center gap-4 mb-6">
+                <button onclick="showPage('homePage')" class="p-2 rounded-xl bg-[#1a1a25] border border-[#2a2a35]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="text-xl font-bold">Gift Code</h2>
+            </header>
+            <div class="glass-card p-6 text-center">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9] flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                </div>
+                <form id="giftCodeForm">
+                    <input type="text" id="giftCodeInput" class="input-field text-center font-mono text-lg mb-4" placeholder="Enter Code" required>
+                    <button type="submit" class="btn-premium w-full">Claim Code</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- HISTORY PAGE -->
+        <div id="historyPage" class="page">
+            <header class="flex items-center gap-4 mb-6">
+                <button onclick="showPage('homePage')" class="p-2 rounded-xl bg-[#1a1a25] border border-[#2a2a35]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                </button>
+                <h2 class="text-xl font-bold" id="historyTitle">History</h2>
+            </header>
+            <div id="historyContent"></div>
+        </div>
+
+        <!-- ADMIN PANEL -->
+        <div id="adminPanel" class="page">
+            <header class="flex items-center justify-between mb-6">
+                <div>
+                    <p class="text-[#f43f5e] text-sm font-semibold">Admin Panel</p>
+                    <h2 class="text-xl font-bold">Dashboard</h2>
+                </div>
+                <button onclick="adminLogout()" class="btn-secondary text-[#f43f5e] border-[#f43f5e] text-sm py-2">Logout</button>
+            </header>
+
+            <div class="grid grid-cols-2 gap-3 mb-6">
+                <div class="glass-card p-4"><p class="text-xs text-[#a1a1aa]">Users</p><p class="text-xl font-bold text-[#d4a853]" id="adminTotalUsers">0</p></div>
+                <div class="glass-card p-4"><p class="text-xs text-[#a1a1aa]">Active</p><p class="text-xl font-bold text-[#10b981]" id="adminActiveUsers">0</p></div>
+                <div class="glass-card p-4"><p class="text-xs text-[#a1a1aa]">Withdraw</p><p class="text-xl font-bold text-[#f43f5e]" id="adminTotalWithdraw">0</p></div>
+                <div class="glass-card p-4"><p class="text-xs text-[#a1a1aa]">Pending</p><p class="text-xl font-bold text-[#fbbf24]" id="adminPendingRequests">0</p></div>
+            </div>
+
+            <div class="tab-container mb-4">
+                <button class="tab-btn active" onclick="showAdminTab('activation')">Activation</button>
+                <button class="tab-btn" onclick="showAdminTab('users')">Users</button>
+                <button class="tab-btn" onclick="showAdminTab('withdraw')">Withdraw</button>
+                <button class="tab-btn" onclick="showAdminTab('gmail')">Gmail</button>
+            </div>
+
+            <div id="adminActivationTab" class="admin-tab"></div>
+            <div id="adminUsersTab" class="admin-tab" style="display:none"></div>
+            <div id="adminWithdrawTab" class="admin-tab" style="display:none"></div>
+            <div id="adminGmailTab" class="admin-tab" style="display:none"></div>
+
+            <!-- Admin Settings -->
+            <div class="glass-card p-5 mt-6">
+                <h3 class="font-semibold mb-4">Settings</h3>
+                <div class="space-y-3">
+                    <div class="flex gap-2"><input type="number" id="activeBonus" class="input-field" placeholder="Active Bonus"><button onclick="updateSetting('activeBonus')" class="btn-premium px-4">Save</button></div>
+                    <div class="flex gap-2"><input type="number" id="gmailRate" class="input-field" placeholder="Gmail Rate"><button onclick="updateSetting('gmailRate')" class="btn-premium px-4">Save</button></div>
+                    <div class="flex gap-2"><input type="number" id="minWithdraw" class="input-field" placeholder="Min Withdraw"><button onclick="updateSetting('minWithdraw')" class="btn-premium px-4">Save</button></div>
+                    <textarea id="adminNotice" class="input-field" placeholder="Notice Board"></textarea>
+                    <button onclick="updateSetting('notice')" class="btn-secondary w-full">Update Notice</button>
+                    <hr class="border-[#2a2a35] my-4">
+                    <h4 class="font-semibold text-sm text-[#d4a853]">Create Gift Code</h4>
+                    <div class="flex gap-2"><input type="text" id="giftCodeText" class="input-field" placeholder="Code"><input type="number" id="giftCodeAmount" class="input-field w-24" placeholder="Amount"></div>
+                    <button onclick="createGiftCode()" class="btn-premium w-full">Create Code</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ============ DATABASE CONFIG ============
+        let DB = {
+            users: JSON.parse(localStorage.getItem('db_users') || '[]'),
+            withdrawals: JSON.parse(localStorage.getItem('db_withdrawals') || '[]'),
+            gmailRequests: JSON.parse(localStorage.getItem('db_gmailRequests') || '[]'),
+            activationRequests: JSON.parse(localStorage.getItem('db_activationRequests') || '[]'),
+            giftCodes: JSON.parse(localStorage.getItem('db_giftCodes') || '[]'),
+            settings: JSON.parse(localStorage.getItem('db_settings') || JSON.stringify({
+                activeBonus: 10, gmailRate: 10, minWithdraw: 50, notice: 'Welcome to SuperEarn BD!'
+            })),
+            admin: { username: 'admin', password: 'admin123' }
+        };
+
+        function saveDB() {
+            localStorage.setItem('db_users', JSON.stringify(DB.users));
+            localStorage.setItem('db_withdrawals', JSON.stringify(DB.withdrawals));
+            localStorage.setItem('db_gmailRequests', JSON.stringify(DB.gmailRequests));
+            localStorage.setItem('db_activationRequests', JSON.stringify(DB.activationRequests));
+            localStorage.setItem('db_giftCodes', JSON.stringify(DB.giftCodes));
+            localStorage.setItem('db_settings', JSON.stringify(DB.settings));
+        }
+
+        // ============ STATE ============
+        let currentUser = null;
+        let isAdmin = false;
+        let currentWallet = 'refer';
+        let currentHistory = 'withdraw';
+
+        // ============ UTILS ============
+        const $ = id => document.getElementById(id);
+        const genId = () => 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        function showToast(msg, type = 'success') {
+            const t = $('toast');
+            $('toast-message').textContent = msg;
+            t.className = 'toast ' + type;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            $(id).classList.add('active');
+            if (id === 'homePage') updateHome();
+            if (id === 'withdrawPage') updateWithdrawPage();
+            if (id === 'gmailSellPage') updateGmailPage();
+            if (id === 'freeJobPage') updateFreeJobPage();
+            if (id === 'typingJobPage') updateTypingJobPage();
+            if (id === 'historyPage') updateHistoryPage();
+            if (id === 'adminPanel') updateAdminPanel();
+        }
+
+        function toggleSidebar() {
+            $('sidebar').classList.toggle('active');
+            $('sidebarOverlay').classList.toggle('active');
+        }
+
+        // ============ MENU ============
+        function updateMenu() {
+            if (!currentUser) return;
+            const nav = $('menuNav');
+            nav.innerHTML = `
+                <div class="menu-item" onclick="showPage('homePage'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                    <span>Home</span>
+                </div>
+                <div class="menu-item" onclick="showPage('gmailSellPage'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span>Gmail Sell</span>
+                </div>
+                <div class="menu-item" onclick="showPage('freeJobPage'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    <span>Free Job</span>
+                </div>
+                <div class="menu-item" onclick="showPage('typingJobPage'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+                    <span>Typing Job</span>
+                </div>
+                <div class="menu-item" onclick="showPage('withdrawPage'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    <span>Withdraw</span>
+                </div>
+                <div class="menu-item" onclick="showPage('giftCodePage'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/></svg>
+                    <span>Gift Code</span>
+                </div>
+                
+                <div class="p-4 border-t border-[#2a2a35] mt-2 text-xs text-[#71717a]">HISTORY</div>
+                
+                <div class="menu-item" onclick="showHistory('withdraw'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span>Withdraw History</span>
+                </div>
+                <div class="menu-item" onclick="showHistory('gmail'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                    <span>Gmail History</span>
+                </div>
+                <div class="menu-item" onclick="showHistory('freejob'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/></svg>
+                    <span>Free Job History</span>
+                </div>
+                <div class="menu-item" onclick="showHistory('typing'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/></svg>
+                    <span>Typing History</span>
+                </div>
+                <div class="menu-item" onclick="showHistory('refer'); toggleSidebar();">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    <span>Referral History</span>
+                </div>
+
+                <div class="p-4 border-t border-[#2a2a35] mt-2">
+                    <div class="menu-item text-[#f43f5e]" onclick="logout(); toggleSidebar();">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        <span>Logout</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============ AUTH ============
+        $('loginForm').onsubmit = function(e) {
+            e.preventDefault();
+            const email = $('loginEmail').value;
+            const pass = $('loginPassword').value;
+            const user = DB.users.find(u => (u.email === email || u.username === email) && u.password === pass);
+            if (user) {
+                if (user.banned) return showToast('Account banned!', 'error');
+                currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                showToast('Login Success!');
+                showPage('homePage');
+                updateMenu();
+            } else {
+                showToast('Invalid credentials', 'error');
+            }
+        };
+
+        $('registerForm').onsubmit = function(e) {
+            e.preventDefault();
+            const username = $('regUsername').value;
+            const email = $('regEmail').value;
+            const pass = $('regPassword').value;
+            const cpass = $('regConfirmPassword').value;
+            const ref = $('regReferral').value;
+
+            if (pass !== cpass) return showToast('Passwords do not match', 'error');
+            if (DB.users.find(u => u.email === email)) return showToast('Email exists', 'error');
+            if (DB.users.find(u => u.username === username)) return showToast('Username taken', 'error');
+
+            const newUser = {
+                id: genId(),
+                username, email, password: pass,
+                referralCode: 'REF' + username.toUpperCase().substring(0,4) + Math.random().toString(36).substr(2,4).toUpperCase(),
+                referredBy: null,
+                active: false,
+                banned: false,
+                balances: { refer: 0, gmail: 0, job: 0 },
+                referrals: [],
+                referralCount: 0,
+                activeReferrals: 0,
+                completedJobs: [],
+                typingJobs: [],
+                createdAt: new Date().toISOString()
+            };
+
+            if (ref) {
+                const referrer = DB.users.find(u => u.referralCode === ref);
+                if (referrer) {
+                    newUser.referredBy = referrer.id;
+                    referrer.referrals.push(newUser.id);
+                    referrer.referralCount++;
+                }
+            }
+
+            DB.users.push(newUser);
+            saveDB();
+            currentUser = newUser;
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            showToast('Account created!');
+            showPage('homePage');
+            updateMenu();
+        };
+
+        $('adminLoginForm').onsubmit = function(e) {
+            e.preventDefault();
+            if ($('adminUsername').value === DB.admin.username && $('adminPassword').value === DB.admin.password) {
+                isAdmin = true;
+                showToast('Welcome Admin!');
+                showPage('adminPanel');
+            } else {
+                showToast('Wrong credentials', 'error');
+            }
+        };
+
+        function telegramLogin() {
+            // Simulate Telegram Login
+            const tgId = 'tg_' + Date.now();
+            let user = DB.users.find(u => u.telegramId === tgId);
+            if (user) {
+                currentUser = user;
+            } else {
+                user = {
+                    id: genId(),
+                    username: 'tg_user_' + Math.random().toString(36).substr(2,5),
+                    email: tgId + '@telegram',
+                    password: 'tg',
+                    referralCode: 'TG' + Math.random().toString(36).substr(2,8).toUpperCase(),
+                    telegramId: tgId,
+                    active: false, banned: false,
+                    balances: { refer: 0, gmail: 0, job: 0 },
+                    referrals: [], referralCount: 0, activeReferrals: 0,
+                    completedJobs: [], typingJobs: []
+                };
+                DB.users.push(user);
+                saveDB();
+                currentUser = user;
+            }
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showToast('Telegram Login Success!');
+            showPage('homePage');
+            updateMenu();
+        }
+
+        function logout() {
+            currentUser = null;
+            isAdmin = false;
+            localStorage.removeItem('currentUser');
+            showPage('loginPage');
+            $('menuNav').innerHTML = '';
+        }
+
+        function adminLogout() {
+            isAdmin = false;
+            showPage('loginPage');
+        }
+
+        // ============ HOME ============
+        function updateHome() {
+            if (!currentUser) return;
+            $('userDisplayName').textContent = currentUser.username;
+            const total = currentUser.balances.refer + currentUser.balances.gmail + currentUser.balances.job;
+            $('totalBalance').textContent = total.toFixed(2) + ' TK';
+            $('referBalance').textContent = currentUser.balances.refer.toFixed(2);
+            $('gmailBalance').textContent = currentUser.balances.gmail.toFixed(2);
+            $('jobBalance').textContent = currentUser.balances.job.toFixed(2);
+            $('totalReferrals').textContent = currentUser.referralCount;
+            $('activeReferrals').textContent = currentUser.activeReferrals;
+            $('userReferralLink').textContent = `https://t.me/SuperEarnbd_bot?startapp=${currentUser.referralCode}`;
+            $('noticeBoard').innerHTML = `<p><strong>Notice:</strong> ${DB.settings.notice}</p>`;
+
+            // Activation Logic
+            const pendingActivation = DB.activationRequests.find(r => r.userId === currentUser.id && r.status === 'pending');
+            
+            if (currentUser.active) {
+                $('accountStatusBanner').innerHTML = `
+                    <div class="glass-card p-4 border-[#10b981] bg-[#10b981]/10 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-[#10b981]/20 flex items-center justify-center">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                        </div>
+                        <div><p class="font-semibold text-[#10b981]">Account Active</p><p class="text-xs text-[#a1a1aa]">All features unlocked</p></div>
+                    </div>`;
+            } else if (pendingActivation) {
+                $('accountStatusBanner').innerHTML = `
+                    <div class="glass-card p-4 border-[#fbbf24] bg-[#fbbf24]/10">
+                        <p class="font-semibold text-[#fbbf24]">Activation Pending</p>
+                        <p class="text-xs text-[#a1a1aa]">Wait for admin approval</p>
+                    </div>`;
+            } else {
+                $('accountStatusBanner').innerHTML = `
+                    <div class="glass-card p-4 border-[#f43f5e] bg-[#f43f5e]/10 flex items-center justify-between">
+                        <div><p class="font-semibold text-[#f43f5e]">Account Not Active</p><p class="text-xs text-[#a1a1aa]">Activate to unlock</p></div>
+                        <button onclick="requestActivation()" class="btn-premium text-sm py-2">Activate</button>
+                    </div>`;
+            }
+        }
+
+        function requestActivation() {
+            if (!currentUser) return;
+            const exists = DB.activationRequests.find(r => r.userId === currentUser.id);
+            if (exists) return showToast('Already requested', 'error');
+            
+            DB.activationRequests.push({
+                id: genId(),
+                userId: currentUser.id,
+                username: currentUser.username,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            });
+            saveDB();
+            showToast('Activation request sent!');
+            updateHome();
+        }
+
+        // ============ WITHDRAW ============
+        function switchWithdrawWallet(type) {
+            currentWallet = type;
+            document.querySelectorAll('#withdrawPage .tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            updateWithdrawPage();
+        }
+
+        function updateWithdrawPage() {
+            if (!currentUser) return;
+            $('withdrawAvailable').textContent = currentUser.balances[currentWallet].toFixed(2) + ' TK';
+            $('withdrawMin').textContent = DB.settings.minWithdraw;
+        }
+
+        $('withdrawForm').onsubmit = function(e) {
+            e.preventDefault();
+            const amt = parseFloat($('withdrawAmount').value);
+            const method = $('withdrawMethod').value;
+            const acc = $('withdrawAccount').value;
+
+            if (amt < DB.settings.minWithdraw) return showToast('Minimum ' + DB.settings.minWithdraw + ' TK', 'error');
+            if (amt > currentUser.balances[currentWallet]) return showToast('Insufficient balance', 'error');
+
+            currentUser.balances[currentWallet] -= amt;
+            
+            DB.withdrawals.push({
+                id: genId(), userId: currentUser.id, username: currentUser.username,
+                amount: amt, wallet: currentWallet, method: method, account: acc,
+                status: 'pending', createdAt: new Date().toISOString()
+            });
+
+            saveDB();
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showToast('Request submitted!');
+            this.reset();
+            updateWithdrawPage();
+        };
+
+        // ============ GMAIL SELL ============
+        function updateGmailPage() {
+            if (!currentUser) return $('gmailSellContent').innerHTML = '<p class="text-center text-[#71717a]">Login required</p>';
+            if (!currentUser.active) {
+                return $('gmailSellContent').innerHTML = `
+                    <div class="glass-card p-6 text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#f43f5e]/20 flex items-center justify-center">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                        <h3 class="text-lg font-semibold mb-2">Feature Locked</h3>
+                        <p class="text-sm text-[#a1a1aa] mb-4">Activate account to sell Gmail</p>
+                    </div>`;
+            }
+            $('gmailSellContent').innerHTML = `
+                <div class="glass-card p-4 mb-4 flex justify-between items-center">
+                    <div><p class="text-xs text-[#a1a1aa]">Rate</p><p class="font-bold text-[#d4a853]">${DB.settings.gmailRate} TK/Gmail</p></div>
+                    <div class="text-right"><p class="text-xs text-[#a1a1aa]">Balance</p><p class="font-bold text-[#06b6d4]">${currentUser.balances.gmail.toFixed(2)} TK</p></div>
+                </div>
+                <div class="glass-card p-5">
+                    <form id="gmailSellForm" class="space-y-3">
+                        <input type="email" id="gmailAddr" class="input-field" placeholder="Gmail Address" required>
+                        <input type="text" id="gmailPass" class="input-field" placeholder="Password" required>
+                        <button class="btn-premium w-full">Submit</button>
+                    </form>
+                </div>`;
+            
+            $('gmailSellForm').onsubmit = function(e) {
+                e.preventDefault();
+                DB.gmailRequests.push({
+                    id: genId(), userId: currentUser.id, username: currentUser.username,
+                    gmail: $('gmailAddr').value, password: $('gmailPass').value,
+                    amount: DB.settings.gmailRate, status: 'pending', createdAt: new Date().toISOString()
+                });
+                saveDB();
+                showToast('Submitted for review!');
+                this.reset();
+            };
+        }
+
+        // ============ FREE JOB ============
+        const JOBS = [
+            { id: 1, title: 'Join Telegram Channel', reward: 5, type: 'channel' },
+            { id: 2, title: 'Visit Website', reward: 2, type: 'visit' },
+            { id: 3, title: 'Watch Video', reward: 3, type: 'video' }
+        ];
+
+        function updateFreeJobPage() {
+            if (!currentUser) return;
+            if (!currentUser.active) {
+                return $('freeJobContent').innerHTML = `<div class="glass-card p-6 text-center"><p class="text-[#f43f5e]">Account not active</p></div>`;
+            }
+            
+            let html = `<div class="glass-card p-4 mb-4"><p class="text-sm text-[#a1a1aa]">Job Balance</p><p class="text-xl font-bold text-[#fbbf24]">${currentUser.balances.job.toFixed(2)} TK</p></div>`;
+            
+            JOBS.forEach(job => {
+                const done = currentUser.completedJobs.includes(job.id);
+                html += `
+                    <div class="glass-card p-4 mb-3 flex items-center justify-between ${done ? 'opacity-50' : ''}">
+                        <div><p class="font-semibold">${job.title}</p><p class="text-sm text-[#10b981]">+${job.reward} TK</p></div>
+                        ${done ? '<span class="badge badge-approved">Done</span>' : `<button onclick="completeJob(${job.id}, ${job.reward})" class="btn-premium py-2 px-4 text-sm">Start</button>`}
+                    </div>`;
+            });
+            $('freeJobContent').innerHTML = html;
+        }
+
+        function completeJob(id, reward) {
+            if (!currentUser.completedJobs.includes(id)) {
+                currentUser.completedJobs.push(id);
+                currentUser.balances.job += reward;
+                // Save history
+                DB.gmailRequests.push({ // Reusing for demo, ideally separate collection
+                    id: genId(), userId: currentUser.id, type: 'freejob', jobId: id, reward: reward, status: 'approved', createdAt: new Date().toISOString()
+                });
+                
+                saveDB();
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                showToast(`+${reward} TK added!`);
+                updateFreeJobPage();
+            }
+        }
+
+        // ============ TYPING JOB ============
+        function updateTypingJobPage() {
+            if (!currentUser) return;
+            if (!currentUser.active) return $('typingJobContent').innerHTML = `<div class="glass-card p-6 text-center"><p class="text-[#f43f5e]">Account not active</p></div>`;
+            
+            // Unlock condition: 10 referrals
+            if (currentUser.referralCount < 10) {
+                return $('typingJobContent').innerHTML = `
+                    <div class="glass-card p-6 text-center">
+                        <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[#fbbf24]/20 flex items-center justify-center">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        </div>
+                        <h3 class="font-semibold mb-2">Locked</h3>
+                        <p class="text-sm text-[#a1a1aa]">Need ${10 - currentUser.referralCount} more referrals</p>
+                    </div>`;
+            }
+
+            $('typingJobContent').innerHTML = `
+                <div class="glass-card p-4 mb-4"><p class="text-sm text-[#a1a1aa]">Completed</p><p class="text-xl font-bold text-[#fbbf24]">${currentUser.typingJobs.length} Jobs</p></div>
+                <div class="glass-card p-5">
+                    <p class="text-sm text-[#a1a1aa] mb-2">Type this text:</p>
+                    <div class="bg-[#12121a] p-3 rounded-lg text-sm font-mono mb-3 border border-[#2a2a35]">The quick brown fox jumps over the lazy dog.</div>
+                    <textarea id="typingInput" class="input-field h-24 mb-3" placeholder="Type here..."></textarea>
+                    <button onclick="submitTyping()" class="btn-premium w-full">Submit</button>
+                </div>`;
+        }
+
+        function submitTyping() {
+            const text = $('typingInput').value;
+            if (text.length < 20) return showToast('Type more text', 'error');
+            
+            currentUser.typingJobs.push({ date: new Date().toISOString(), text: text });
+            currentUser.balances.job += 5;
+            saveDB();
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showToast('+5 TK added!');
+            updateTypingJobPage();
+        }
+
+        // ============ GIFT CODE ============
+        $('giftCodeForm').onsubmit = function(e) {
+            e.preventDefault();
+            const code = $('giftCodeInput').value.trim();
+            const gc = DB.giftCodes.find(g => g.code === code && !g.used);
+            if (!gc) return showToast('Invalid code', 'error');
+            
+            gc.used = true;
+            gc.usedBy = currentUser.id;
+            currentUser.balances.refer += gc.amount;
+            
+            saveDB();
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            showToast(`Claimed ${gc.amount} TK!`);
+            this.reset();
+            showPage('homePage');
+        };
+
+        // ============ HISTORY ============
+        function showHistory(type) {
+            currentHistory = type;
+            const titles = { withdraw: 'Withdraw', gmail: 'Gmail', freejob: 'Free Job', typing: 'Typing', refer: 'Referral' };
+            $('historyTitle').textContent = titles[type] + ' History';
+            showPage('historyPage');
+        }
+
+        function updateHistoryPage() {
+            if (!currentUser) return;
+            let html = '';
+            
+            if (currentHistory === 'withdraw') {
+                const items = DB.withdrawals.filter(w => w.userId === currentUser.id);
+                if(items.length===0) html = '<p class="text-center text-[#71717a]">No history</p>';
+                items.forEach(i => {
+                    html += `<div class="glass-card p-4 mb-3 flex justify-between items-center">
+                        <div><p class="font-semibold">${i.amount} TK</p><p class="text-xs text-[#71717a]">${i.method} - ${i.account}</p></div>
+                        <span class="badge badge-${i.status}">${i.status}</span>
+                    </div>`;
+                });
+            } else if (currentHistory === 'gmail') {
+                const items = DB.gmailRequests.filter(g => g.userId === currentUser.id && g.gmail);
+                if(items.length===0) html = '<p class="text-center text-[#71717a]">No history</p>';
+                items.forEach(i => {
+                    html += `<div class="glass-card p-4 mb-3 flex justify-between items-center">
+                        <div><p class="font-semibold">${i.gmail}</p><p class="text-xs text-[#71717a]">${i.amount} TK</p></div>
+                        <span class="badge badge-${i.status}">${i.status}</span>
+                    </div>`;
+                });
+            } else if (currentHistory === 'freejob') {
+                if(currentUser.completedJobs.length===0) html = '<p class="text-center text-[#71717a]">No history</p>';
+                currentUser.completedJobs.forEach(id => {
+                    const job = JOBS.find(j => j.id === id);
+                    if(job) html += `<div class="glass-card p-4 mb-3"><p class="font-semibold">${job.title}</p><p class="text-xs text-[#10b981]">+${job.reward} TK</p></div>`;
+                });
+            } else if (currentHistory === 'typing') {
+                if(currentUser.typingJobs.length===0) html = '<p class="text-center text-[#71717a]">No history</p>';
+                currentUser.typingJobs.forEach(i => {
+                    html += `<div class="glass-card p-4 mb-3"><p class="font-semibold">Typing Task</p><p class="text-xs text-[#10b981]">+5 TK</p><p class="text-xs text-[#71717a] mt-1">${new Date(i.date).toLocaleString()}</p></div>`;
+                });
+            } else if (currentHistory === 'refer') {
+                const refs = DB.users.filter(u => u.referredBy === currentUser.id);
+                if(refs.length===0) html = '<p class="text-center text-[#71717a]">No referrals</p>';
+                refs.forEach(u => {
+                    html += `<div class="glass-card p-4 mb-3 flex justify-between items-center">
+                        <p class="font-semibold">${u.username}</p>
+                        <span class="badge ${u.active ? 'badge-approved' : 'badge-pending'}">${u.active ? 'Active' : 'Pending'}</span>
+                    </div>`;
+                });
+            }
+            $('historyContent').innerHTML = html;
+        }
+
+        // ============ REFERRAL ============
+        function copyReferralLink() {
+            navigator.clipboard.writeText($('userReferralLink').textContent);
+            showToast('Link copied!');
+        }
+        function shareReferralLink() {
+            window.open(`https://t.me/share/url?url=${encodeURIComponent($('userReferralLink').textContent)}`, '_blank');
+        }
+
+        // ============ ADMIN ============
+        function updateAdminPanel() {
+            $('adminTotalUsers').textContent = DB.users.length;
+            $('adminActiveUsers').textContent = DB.users.filter(u => u.active).length;
+            $('adminTotalWithdraw').textContent = DB.withdrawals.filter(w => w.status === 'approved').reduce((a,b) => a + b.amount, 0).toFixed(0);
+            $('adminPendingRequests').textContent = DB.withdrawals.filter(w => w.status === 'pending').length + DB.gmailRequests.filter(g => g.status === 'pending').length + DB.activationRequests.filter(a => a.status === 'pending').length;
+            
+            $('activeBonus').value = DB.settings.activeBonus;
+            $('gmailRate').value = DB.settings.gmailRate;
+            $('minWithdraw').value = DB.settings.minWithdraw;
+            $('adminNotice').value = DB.settings.notice;
+
+            showAdminTab('activation');
+        }
+
+        function showAdminTab(tab) {
+            document.querySelectorAll('.admin-tab').forEach(t => t.style.display = 'none');
+            document.querySelectorAll('#adminPanel .tab-btn').forEach(b => b.classList.remove('active'));
+            
+            if(tab === 'activation') {
+                $('adminActivationTab').style.display = 'block';
+                $('adminActivationTab').innerHTML = renderActivationRequests();
+            } else if(tab === 'users') {
+                $('adminUsersTab').style.display = 'block';
+                $('adminUsersTab').innerHTML = renderUsers();
+            } else if(tab === 'withdraw') {
+                $('adminWithdrawTab').style.display = 'block';
+                $('adminWithdrawTab').innerHTML = renderWithdrawRequests();
+            } else if(tab === 'gmail') {
+                $('adminGmailTab').style.display = 'block';
+                $('adminGmailTab').innerHTML = renderGmailRequests();
+            }
+            if (event && event.target) event.target.classList.add('active');
+        }
+
+        function renderActivationRequests() {
+            const items = DB.activationRequests.filter(r => r.status === 'pending');
+            if(items.length === 0) return '<p class="text-center text-[#71717a]">No pending requests</p>';
+            return items.map(i => `
+                <div class="glass-card p-4 mb-3 flex justify-between items-center">
+                    <div><p class="font-semibold">${i.username}</p><p class="text-xs text-[#71717a]">${new Date(i.createdAt).toLocaleString()}</p></div>
+                    <div class="flex gap-2">
+                        <button onclick="approveActivation('${i.id}')" class="btn-premium py-1 px-3 text-sm">Approve</button>
+                        <button onclick="rejectActivation('${i.id}')" class="btn-secondary py-1 px-3 text-sm border-[#f43f5e] text-[#f43f5e]">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approveActivation(id) {
+            const req = DB.activationRequests.find(r => r.id === id);
+            if(!req) return;
+            const user = DB.users.find(u => u.id === req.userId);
+            if(user) {
+                user.active = true;
+                // Bonus to referrer
+                if(user.referredBy) {
+                    const ref = DB.users.find(u => u.id === user.referredBy);
+                    if(ref) {
+                        ref.balances.refer += DB.settings.activeBonus;
+                        ref.activeReferrals++;
+                    }
+                }
+            }
+            req.status = 'approved';
+            saveDB();
+            showToast('Activated!');
+            showAdminTab('activation');
+        }
+
+        function rejectActivation(id) {
+            const req = DB.activationRequests.find(r => r.id === id);
+            if(req) req.status = 'rejected';
+            saveDB();
+            showToast('Rejected', 'error');
+            showAdminTab('activation');
+        }
+
+        function renderUsers() {
+            return DB.users.map(u => `
+                <div class="glass-card p-4 mb-3 flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold">${u.username} ${u.banned ? '<span class="badge badge-rejected">Banned</span>' : ''} ${u.active ? '<span class="badge badge-approved">Active</span>' : ''}</p>
+                        <p class="text-xs text-[#71717a]">${u.email} | Bal: ${u.balances.refer + u.balances.gmail + u.balances.job}</p>
+                    </div>
+                    <button onclick="toggleBan('${u.id}')" class="btn-secondary py-1 px-3 text-sm">${u.banned ? 'Unban' : 'Ban'}</button>
+                </div>
+            `).join('');
+        }
+
+        function toggleBan(id) {
+            const user = DB.users.find(u => u.id === id);
+            if(user) {
+                user.banned = !user.banned;
+                saveDB();
+                showToast(user.banned ? 'Banned' : 'Unbanned');
+                showAdminTab('users');
+            }
+        }
+
+        function renderWithdrawRequests() {
+            const items = DB.withdrawals.filter(w => w.status === 'pending');
+            if(items.length === 0) return '<p class="text-center text-[#71717a]">No pending requests</p>';
+            return items.map(i => `
+                <div class="glass-card p-4 mb-3">
+                    <div class="flex justify-between mb-2"><p class="font-semibold">${i.username}</p><p class="text-[#d4a853] font-bold">${i.amount} TK</p></div>
+                    <p class="text-xs text-[#a1a1aa] mb-3">${i.method} - ${i.account} (${i.wallet})</p>
+                    <div class="flex gap-2">
+                        <button onclick="approveWithdraw('${i.id}')" class="btn-premium flex-1 py-2 text-sm">Approve</button>
+                        <button onclick="rejectWithdraw('${i.id}')" class="btn-secondary flex-1 py-2 text-sm border-[#f43f5e] text-[#f43f5e]">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approveWithdraw(id) {
+            const req = DB.withdrawals.find(w => w.id === id);
+            if(req) {
+                req.status = 'approved';
+                saveDB();
+                showToast('Approved!');
+                showAdminTab('withdraw');
+            }
+        }
+
+        function rejectWithdraw(id) {
+            const req = DB.withdrawals.find(w => w.id === id);
+            if(req) {
+                const user = DB.users.find(u => u.id === req.userId);
+                if(user) user.balances[req.wallet] += req.amount; // Refund
+                req.status = 'rejected';
+                saveDB();
+                showToast('Rejected & Refunded', 'error');
+                showAdminTab('withdraw');
+            }
+        }
+
+        function renderGmailRequests() {
+            const items = DB.gmailRequests.filter(g => g.status === 'pending' && g.gmail);
+            if(items.length === 0) return '<p class="text-center text-[#71717a]">No pending requests</p>';
+            return items.map(i => `
+                <div class="glass-card p-4 mb-3">
+                    <div class="flex justify-between mb-2"><p class="font-semibold">${i.username}</p><p class="text-[#06b6d4]">${i.amount} TK</p></div>
+                    <p class="text-xs text-[#a1a1aa] mb-3">${i.gmail} : ${i.password}</p>
+                    <div class="flex gap-2">
+                        <button onclick="approveGmail('${i.id}')" class="btn-premium flex-1 py-2 text-sm">Approve</button>
+                        <button onclick="rejectGmail('${i.id}')" class="btn-secondary flex-1 py-2 text-sm border-[#f43f5e] text-[#f43f5e]">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approveGmail(id) {
+            const req = DB.gmailRequests.find(g => g.id === id);
+            if(req) {
+                const user = DB.users.find(u => u.id === req.userId);
+                if(user) user.balances.gmail += req.amount;
+                req.status = 'approved';
+                saveDB();
+                showToast('Approved!');
+                showAdminTab('gmail');
+            }
+        }
+
+        function rejectGmail(id) {
+            const req = DB.gmailRequests.find(g => g.id === id);
+            if(req) {
+                req.status = 'rejected';
+                saveDB();
+                showToast('Rejected', 'error');
+                showAdminTab('gmail');
+            }
+        }
+
+        function updateSetting(key) {
+            if(key === 'notice') DB.settings.notice = $('adminNotice').value;
+            else DB.settings[key] = parseFloat($(key).value);
+            saveDB();
+            showToast('Updated!');
+        }
+
+        function createGiftCode() {
+            const code = $('giftCodeText').value;
+            const amt = parseFloat($('giftCodeAmount').value);
+            if(!code || !amt) return showToast('Fill all fields', 'error');
+            DB.giftCodes.push({ id: genId(), code: code, amount: amt, used: false });
+            saveDB();
+            showToast('Code created!');
+            $('giftCodeText').value = '';
+            $('giftCodeAmount').value = '';
+        }
+
+        // ============ INIT ============
+        const savedUser = localStorage.getItem('currentUser');
+        if (savedUser) {
+            currentUser = JSON.parse(savedUser);
+            const freshUser = DB.users.find(u => u.id === currentUser.id);
+            if (freshUser) {
+                currentUser = freshUser; // Sync with DB
+                showPage('homePage');
+                updateMenu();
+            } else {
+                localStorage.removeItem('currentUser');
+                showPage('loginPage');
+            }
+        }
+    </script>
+</body>
+</html>
